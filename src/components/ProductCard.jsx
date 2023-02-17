@@ -23,7 +23,7 @@ const ProductCard = ({ order, action }) => {
         </span>
         <div className="d-flex flex-column justify-content-between">
           <div className="d-flex flex-column my-2">
-            <span className="px-1 text-muted lead">{order.productName}</span>
+            <span className="px-1 lead">{order.productName}</span>
             <span
               className="px-1"
               style={{ fontSize: ".7em", fontWeight: "lighter" }}
