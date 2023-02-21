@@ -3,7 +3,6 @@ import { Routes, Route } from "react-router-dom";
 import Login from "./pages/Login";
 import ProtectedRoutes from "./components/ProtectedRoutes";
 import Signup from "./pages/Signup";
-// import Confirm from "./pages/Confirm";
 import Home from "./pages/Home";
 import Dashboard from "./components/Dashboard";
 import Confirm from "./components/Confirm";
@@ -14,17 +13,12 @@ function App() {
       <Routes>
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
-
-        {/* <Route path="/confirm" element={<Confirm />} /> */}
-
         <Route element={<ProtectedRoutes />}>
-
-        <Route path="/" element={<Home />}>
-          <Route path="/" element={<Dashboard />} />
-          <Route path="/confirm" element={<Confirm />} />
+          <Route path="/" element={<Home />}>
+            <Route path="/" element={<Dashboard />} />
+            <Route path="/confirm" element={<Confirm />} />
+          </Route>
         </Route>
-        </Route>
-
         <Route path="*" element={<p>Error page</p>} />
       </Routes>
     </div>

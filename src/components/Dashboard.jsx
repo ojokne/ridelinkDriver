@@ -1,13 +1,13 @@
 import { useEffect, useRef, useState } from "react";
-import { useTrips } from "../context/StateProvider";
+import { useAuthentication, useData } from "../context/StateProvider";
 
 import { ACTIONS } from "../context/actions";
 import Loader from "./Loader";
 
 const Dashboard = () => {
   const [loading, setLoading] = useState(false);
-  // const { auth } = useAuthentication();
-  const { trips, tripsDispatch } = useTrips();
+  const { auth } = useAuthentication();
+  const { data, dataDispatch } = useData();
   const effectRan = useRef(false);
 
   useEffect(() => {
@@ -15,14 +15,14 @@ const Dashboard = () => {
       setLoading(true);
       try {
         const res = await fetch(
-          `${process.env.REACT_APP_API_HOST}/driver/trips/1`,
+          `${process.env.REACT_APP_API_HOST}/driver/trips/${auth.id}`,
           {
             method: "GET",
             credentials: "include",
           }
         );
         const data = await res.json();
-        tripsDispatch({ type: ACTIONS.ADD_ORDERS, data: data.data });
+        dataDispatch({ type: ACTIONS.ADD_ORDERS, data: data.data });
         setLoading(false);
       } catch (e) {
         console.log(e);
@@ -34,7 +34,7 @@ const Dashboard = () => {
       return () => {
         effectRan.current = true;
 
-        tripsDispatch({ type: ACTIONS.CLEAR_TRIPS });
+        dataDispatch({ type: ACTIONS.CLEAR_TRIPS });
       };
     }
     // for (let i = 0; i < trips.length; i++) {
@@ -47,13 +47,14 @@ const Dashboard = () => {
     //     break;
     //   }
     // }
-  }, [trips, tripsDispatch]);
+  }, [auth, data, dataDispatch]);
 
   if (loading) {
     return <Loader loading={loading} description="Please wait" />;
   }
   return (
     <div>
+      {console.log(data.data)}
       <div className="mx-3 pt-3 lead text-muted">
         <span>Dashboard</span>
       </div>

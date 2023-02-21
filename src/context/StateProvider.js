@@ -1,9 +1,9 @@
 import { createContext, useContext, useReducer } from "react";
 import { authReducer } from "./authReducer";
-import { tripReducer } from "./tripReducer";
+import { dataReducer } from "./dataReducer";
 
 const AuthenticationContext = createContext();
-const TripContext = createContext();
+const DataContext = createContext();
 
 export const StateProvider = ({ children }) => {
   const [auth, authDispatch] = useReducer(authReducer, {
@@ -11,13 +11,13 @@ export const StateProvider = ({ children }) => {
     id: null,
   });
 
-  const [trips, tripsDispatch] = useReducer(tripReducer, []);
+  const [data, dataDispatch] = useReducer(dataReducer, {});
 
   return (
     <AuthenticationContext.Provider value={{ auth, authDispatch }}>
-      <TripContext.Provider value={{ trips, tripsDispatch }}>
+      <DataContext.Provider value={{ data, dataDispatch }}>
         {children}
-      </TripContext.Provider>
+      </DataContext.Provider>
     </AuthenticationContext.Provider>
   );
 };
@@ -26,6 +26,6 @@ export const useAuthentication = () => {
   return useContext(AuthenticationContext);
 };
 
-export const useTrips = () => {
-  return useContext(TripContext);
+export const useData = () => {
+  return useContext(DataContext);
 };
