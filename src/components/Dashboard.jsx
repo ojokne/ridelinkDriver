@@ -1,21 +1,20 @@
-import { useEffect, useRef, useState } from "react";
-import { useAuthentication, useData } from "../context/StateProvider";
-
-import { ACTIONS } from "../context/actions";
+import { useEffect, useState } from "react";
+import { useData } from "../context/StateProvider";
 import Loader from "./Loader";
+import useAuth from "../utils/useAuth";
+import { ACTIONS } from "../context/actions";
 
 const Dashboard = () => {
   const [loading, setLoading] = useState(false);
-  const { auth } = useAuthentication();
   const { data, dataDispatch } = useData();
-  const effectRan = useRef(false);
+  let id = useAuth();
 
   useEffect(() => {
     const fetchTrips = async () => {
       setLoading(true);
       try {
         const res = await fetch(
-          `${process.env.REACT_APP_API_HOST}/driver/trips/${auth.id}`,
+          `${process.env.REACT_APP_API_HOST}/driver/trips/${id}`,
           {
             method: "GET",
             credentials: "include",
@@ -29,14 +28,7 @@ const Dashboard = () => {
         setLoading(false);
       }
     };
-    if (!effectRan.current) {
-      fetchTrips();
-      return () => {
-        effectRan.current = true;
-
-        dataDispatch({ type: ACTIONS.CLEAR_TRIPS });
-      };
-    }
+    fetchTrips();
     // for (let i = 0; i < trips.length; i++) {
     //   console.log(trips);
     //   let trip = trips[i].order;
@@ -47,7 +39,7 @@ const Dashboard = () => {
     //     break;
     //   }
     // }
-  }, [auth, data, dataDispatch]);
+  }, [id, dataDispatch]);
 
   if (loading) {
     return <Loader loading={loading} description="Please wait" />;

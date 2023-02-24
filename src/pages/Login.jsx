@@ -2,8 +2,6 @@ import { useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import Logo from "../components/Logo";
 import { useNavigate } from "react-router-dom";
-import { useAuthentication } from "../context/StateProvider";
-import { ACTIONS } from "../context/actions";
 import Loader from "../components/Loader";
 
 const Login = () => {
@@ -16,7 +14,6 @@ const Login = () => {
   });
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
-  const { authDispatch } = useAuthentication();
 
   const handleShowPassword = () => {
     let passwordField = passwordRef.current;
@@ -42,16 +39,12 @@ const Login = () => {
           role: 1,
         }),
         credentials: "include",
+        mode: "cors",
       });
       const data = await res.json();
       setLoading(false);
       if (data.isAuthenticated) {
-        authDispatch({
-          type: ACTIONS.AUTHENTICATE,
-          isAuthenticated: data.isAuthenticated,
-          id: data.id,
-        });
-
+        sessionStorage.setItem("id", data.id);
         navigate("/");
         setAlert((prev) => {
           return { ...prev, alert: false, message: "" };
@@ -81,7 +74,7 @@ const Login = () => {
       <div className="bg-white rounded  shadow-sm m-3 p-3">
         <Logo />
         {alert.alert && (
-          <div>
+          <div className="mx-auto">
             <div
               className="alert alert-danger alert-dismissible fade show"
               role="alert"
@@ -146,7 +139,7 @@ const Login = () => {
           </button>
         </form>
 
-        <div className="m-3">
+        <div className="mt-3">
           <Link to="/signup" className="text-decoration-none ridelink-color">
             Create an account
           </Link>

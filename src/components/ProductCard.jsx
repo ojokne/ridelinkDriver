@@ -1,5 +1,5 @@
 import { FaTruckMoving } from "react-icons/fa";
-import { useAuthentication } from "../context/StateProvider";
+import useAuth from "../utils/useAuth";
 
 const styles = {
   iconLarge: {
@@ -14,9 +14,9 @@ const styles = {
 };
 
 const ProductCard = ({ order, action, trip }) => {
+  const id = useAuth();
   const date = new Date(order.proposedScheduleDate).toDateString();
   const text = trip.isLoaded ? "Product Delivered" : "Product Loaded";
-  const { auth } = useAuthentication();
   return (
     <div>
       <div className="d-flex flex-row">
@@ -79,7 +79,7 @@ const ProductCard = ({ order, action, trip }) => {
           <div className="px-1 my-2">
             <button
               className="btn ridelink-background text-white "
-              onClick={() => action(auth.id, order.id)}
+              onClick={() => action(id, order.id)}
             >
               {text}
             </button>

@@ -1,13 +1,9 @@
 import { FaCheck, FaSignOutAlt, FaTasks } from "react-icons/fa";
-import { useAuthentication } from "../context/StateProvider";
 import { useNavigate } from "react-router-dom";
 import { Link } from "react-router-dom";
-import { ACTIONS } from "../context/actions";
 
-const MobileMenu = () => {
+const MobileMenu = ({ handleShowMenu }) => {
   const navigate = useNavigate();
-
-  const { authDispatch } = useAuthentication();
 
   const handleLogout = async (e) => {
     e.preventDefault();
@@ -22,7 +18,7 @@ const MobileMenu = () => {
       });
       const data = await res.json();
       if (data.isLoggedOut) {
-        authDispatch({ type: ACTIONS.LOGOUT });
+        sessionStorage.removeItem("id");
         navigate("/login");
       }
     } catch (e) {
@@ -32,7 +28,11 @@ const MobileMenu = () => {
   return (
     <div className="py-1">
       <ul className="p1 m-1 list-unstyled">
-        <Link className="text-decoration-none" to="/">
+        <Link
+          className="text-decoration-none"
+          to="/"
+          onClick={() => handleShowMenu()}
+        >
           <li className="py-2 border-bottom liMenu d-flex justify-content-between align-items-center">
             <span className="text-muted">Dashboard</span>
             <span>
@@ -41,7 +41,11 @@ const MobileMenu = () => {
           </li>
         </Link>
 
-        <Link className="text-decoration-none" to="confirm">
+        <Link
+          className="text-decoration-none"
+          to="confirm"
+          onClick={() => handleShowMenu()}
+        >
           <li className="py-2 border-bottom d-flex align-items-center liMenu d-flex justify-content-between align-items-center">
             <span className="text-muted">Confirm</span>
             <span>
