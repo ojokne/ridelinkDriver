@@ -16,7 +16,9 @@ const styles = {
 const ProductCard = ({ order, action, trip }) => {
   const id = useAuth();
   const date = new Date(order.proposedScheduleDate).toDateString();
-  const text = trip.isLoaded ? "Product Delivered" : "Product Loaded";
+  const text = trip.isLoaded
+    ? "Product has been Delivered"
+    : "Product has been Loaded";
   return (
     <div>
       <div className="d-flex flex-row">

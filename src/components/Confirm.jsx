@@ -1,17 +1,17 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import ProductCard from "../components/ProductCard";
 import { useData } from "../context/StateProvider";
 import Loader from "./Loader";
 
 const Confirm = () => {
   const { data } = useData();
-  const [order, setOrder] = useState({});
-  const [trip, setTrip] = useState({});
   const [element, setElement] = useState(null);
   const [text, setText] = useState("");
   const [loading, setLoading] = useState(false);
-  const effectRan = useRef(false);
+  const [display, setDisplay] = useState(false);
+
   const navigate = useNavigate();
   const [alert, setAlert] = useState({
     alert: false,
@@ -79,43 +79,61 @@ const Confirm = () => {
     [navigate]
   );
   useEffect(() => {
-    if (!effectRan.current) {
-      let displayOrder = {};
-      let displayTrip = {};
-      for (let i = 0; i < data.data.length; i++) {
-        let trip = data.data[i].trip;
-        if (!trip.isDelivered || !trip.isLoaded) {
-          let item = data.data[i].order;
-          // setOrder(item);
-          // setTrip(trip);
-          displayOrder = item;
-          displayTrip = trip;
-          break;
+    if (data.hasOwnProperty("data")) {
+      if (data.data.length) {
+        for (let i = 0; i < data.data.length; i++) {
+          let trip = data.data[i].trip;
+          if (!trip.isDelivered || !trip.isLoaded) {
+            let order = data.data[i].order;
+            setElement(() => {
+              return trip.isLoaded ? (
+                <ProductCard
+                  order={order}
+                  trip={trip}
+                  action={handleDelivering}
+                />
+              ) : (
+                <ProductCard order={order} trip={trip} action={handleLoading} />
+              );
+            });
+            setText(() => {
+              return trip.isLoaded
+                ? "Please confirm if Product has been Delivered"
+                : "Please confirm if product has been Loaded onto the truck";
+            });
+            setDisplay(true);
+            break;
+          }
         }
       }
-      setOrder(displayOrder);
-      setTrip(displayTrip);
-      setElement(() => {
-        return trip.isLoaded ? (
-          <ProductCard order={order} trip={trip} action={handleDelivering} />
-        ) : (
-          <ProductCard order={order} trip={trip} action={handleLoading} />
-        );
-      });
-
-      setText(() => {
-        return trip.isLoaded
-          ? "Please confirm if Product is Delivered"
-          : "Please confirm if product is Loaded onto the truck";
-      });
-
-      return () => {
-        setOrder({});
-        setTrip({});
-        setText("");
-        setElement(null);
-      };
+    } else {
+      console.log("No data");
     }
+    // let displayOrder = {};
+    // let displayTrip = {};
+    // for (let i = 0; i < data.data.length; i++) {
+    //   let trip = data.data[i].trip;
+    //   if (!trip.isDelivered || !trip.isLoaded) {
+    //     let item = data.data[i].order;
+    //     displayOrder = item;
+    //     displayTrip = trip;
+    //     break;
+    //   }
+    // }
+    // setOrder(displayOrder);
+    // setTrip(displayTrip);
+    // setElement(() => {
+    //   return trip.isLoaded ? (
+    //     <ProductCard order={order} trip={trip} action={handleDelivering} />
+    //   ) : (
+    //     <ProductCard order={order} trip={trip} action={handleLoading} />
+    //   );
+    // });
+    // setText(() => {
+    //   return trip.isLoaded
+    //     ? "Please confirm if Product is Delivered"
+    //     : "Please confirm if product is Loaded onto the truck";
+    // });
     // eslint-disable-next-line
   }, [handleDelivering, handleLoading]);
 
@@ -144,11 +162,21 @@ const Confirm = () => {
           </div>
         </div>
       )}
-      {order?.id && (
+      {display && (
         <div className="d-flex justify-content-center align-items-center flex-wrap">
           <div className="bg-white rounded shadow-sm m-3 p-3">
             <p className="text-muted m-1 p-1">{text}</p>
             {element}
+          </div>
+        </div>
+      )}
+      {!display && (
+        <div className="d-flex justify-content-center align-items-center flex-wrap p-4 m-3 bg-white shadow-sm rounded">
+          <div className="lead text-muted text-center">
+            <p>No data to display</p>
+            <Link to="/" className="text-decoration-none">
+              Back home
+            </Link>
           </div>
         </div>
       )}

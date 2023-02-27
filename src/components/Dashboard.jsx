@@ -1,12 +1,16 @@
 import { useEffect, useState } from "react";
 import { useData } from "../context/StateProvider";
+import { FaClock, FaCheck } from "react-icons/fa";
 import Loader from "./Loader";
 import useAuth from "../utils/useAuth";
 import { ACTIONS } from "../context/actions";
 
 const Dashboard = () => {
   const [loading, setLoading] = useState(false);
-  const { data, dataDispatch } = useData();
+  const { dataDispatch } = useData();
+  const [delivered, setDelivered] = useState(0);
+  const [pending, setPending] = useState(0);
+  const [display, setDisplay] = useState(false);
   let id = useAuth();
 
   useEffect(() => {
@@ -21,7 +25,21 @@ const Dashboard = () => {
           }
         );
         const data = await res.json();
+        console.log(data);
         dataDispatch({ type: ACTIONS.ADD_ORDERS, data: data.data });
+        if (data.hasOwnProperty("data")) {
+          if (data.data.length) {
+            for (let i = 0; i < data.data.length; i++) {
+              let trip = data.data[i].trip;
+              if (trip.isDelivered) {
+                setDelivered((prev) => prev + 1);
+              } else {
+                setPending((prev) => prev + 1);
+              }
+            }
+            setDisplay(true);
+          }
+        }
         setLoading(false);
       } catch (e) {
         console.log(e);
@@ -46,11 +64,55 @@ const Dashboard = () => {
   }
   return (
     <div>
-      {console.log(data.data)}
       <div className="mx-3 pt-3 lead text-muted">
         <span>Dashboard</span>
       </div>
-      <div className="d-flex justify-content-center align-items-center flex-wrap"></div>
+      {display && (
+        <div className="d-flex justify-content-center align-items-center flex-wrap">
+          <div
+            style={{ width: "367px" }}
+            className="m-3 p-4 bg-white shadow-sm rounded"
+          >
+            <span className="text-muted" style={{ fontSize: "20px" }}>
+              Pending
+            </span>
+            <div className="d-flex align-items-center">
+              <span>
+                <FaClock
+                  className="icon iconMenu me-3"
+                  style={{ backgroundColor: "#ffc107" }}
+                />
+              </span>
+              <span className="me-3" style={{ fontSize: "30px" }}>
+                {pending}
+              </span>
+            </div>
+          </div>
+          <div
+            style={{ width: "367px" }}
+            className="m-3 p-4 bg-white shadow-sm rounded"
+          >
+            <span className="text-muted" style={{ fontSize: "20px" }}>
+              Delivered
+            </span>
+            <div className="d-flex align-items-center">
+              <span>
+                <FaCheck className="icon iconMenu me-3" />
+              </span>
+              <span className="me-3" style={{ fontSize: "30px" }}>
+                {delivered}
+              </span>
+            </div>
+          </div>
+        </div>
+      )}
+      {!display && (
+        <div className="d-flex justify-content-center align-items-center flex-wrap p-4 m-3 bg-white shadow-sm rounded">
+          <div className="lead text-muted text-center">
+            <p>You have not made and deliveries yet</p>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

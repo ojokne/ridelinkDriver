@@ -1,4 +1,4 @@
-import { FaCheck, FaSignOutAlt, FaTasks } from "react-icons/fa";
+import { FaClock, FaSignOutAlt, FaTasks } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import { Link } from "react-router-dom";
 
@@ -47,9 +47,12 @@ const MobileMenu = ({ handleShowMenu }) => {
           onClick={() => handleShowMenu()}
         >
           <li className="py-2 border-bottom d-flex align-items-center liMenu d-flex justify-content-between align-items-center">
-            <span className="text-muted">Confirm</span>
+            <span className="text-muted">Pending</span>
             <span>
-              <FaCheck className="icon iconMenu" />
+              <FaClock
+                className="icon iconMenu"
+                style={{ backgroundColor: "#ffc107" }}
+              />
             </span>
           </li>
         </Link>

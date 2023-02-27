@@ -1,4 +1,4 @@
-import { FaCheck, FaTasks } from "react-icons/fa";
+import { FaClock, FaTasks } from "react-icons/fa";
 import { Link } from "react-router-dom";
 
 const DesktopMenu = () => {
@@ -17,9 +17,12 @@ const DesktopMenu = () => {
         <Link className="text-decoration-none" to="confirm">
           <li className="py-2 border-bottom liMenu">
             <span>
-              <FaCheck className="icon iconMenu" />
+              <FaClock
+                className="icon iconMenu"
+                style={{ backgroundColor: "#ffc107" }}
+              />
             </span>
-            <span className="text-muted">Confirm</span>
+            <span className="text-muted">Pending</span>
           </li>
         </Link>
       </ul>
