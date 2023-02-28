@@ -25,7 +25,6 @@ const Dashboard = () => {
           }
         );
         const data = await res.json();
-        console.log(data);
         dataDispatch({ type: ACTIONS.ADD_ORDERS, data: data.data });
         if (data.hasOwnProperty("data")) {
           if (data.data.length) {
