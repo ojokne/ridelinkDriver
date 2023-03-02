@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Link } from "react-router-dom";
 import ProductCard from "../components/ProductCard";
 import { useData } from "../context/StateProvider";
+import useToken from "../utils/useToken";
 import Loader from "./Loader";
 
 const Confirm = () => {
@@ -17,6 +18,7 @@ const Confirm = () => {
     alert: false,
     message: "",
   });
+  const token = useToken();
 
   const handleLoading = useCallback(
     async (driverId, orderId) => {
@@ -26,7 +28,10 @@ const Confirm = () => {
           `${process.env.REACT_APP_API_HOST}/driver/load?driverId=${driverId}&orderId=${orderId}`,
           {
             method: "GET",
-            credentials: "include",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: token,
+            },
           }
         );
         const data = await res.json();
@@ -56,7 +61,10 @@ const Confirm = () => {
           `${process.env.REACT_APP_API_HOST}/driver/deliver?driverId=${driverId}&orderId=${orderId}`,
           {
             method: "GET",
-            credentials: "include",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: token,
+            },
           }
         );
         const data = await res.json();

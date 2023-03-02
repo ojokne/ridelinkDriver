@@ -1,5 +1,5 @@
 import { FaTruckMoving } from "react-icons/fa";
-import useAuth from "../utils/useAuth";
+import useId from "../utils/useId";
 
 const styles = {
   iconLarge: {
@@ -14,7 +14,7 @@ const styles = {
 };
 
 const ProductCard = ({ order, action, trip }) => {
-  const id = useAuth();
+  const id = useId();
   const date = new Date(order.proposedScheduleDate).toDateString();
   const text = trip.isLoaded
     ? "Product has been Delivered"

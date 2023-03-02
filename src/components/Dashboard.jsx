@@ -2,8 +2,9 @@ import { useEffect, useState } from "react";
 import { useData } from "../context/StateProvider";
 import { FaClock, FaCheck } from "react-icons/fa";
 import Loader from "./Loader";
-import useAuth from "../utils/useAuth";
 import { ACTIONS } from "../context/actions";
+import useId from "../utils/useId";
+import useToken from "../utils/useToken";
 
 const Dashboard = () => {
   const [loading, setLoading] = useState(false);
@@ -11,7 +12,8 @@ const Dashboard = () => {
   const [delivered, setDelivered] = useState(0);
   const [pending, setPending] = useState(0);
   const [display, setDisplay] = useState(false);
-  let id = useAuth();
+  let id = useId();
+  const token = useToken();
 
   useEffect(() => {
     const fetchTrips = async () => {
@@ -21,7 +23,10 @@ const Dashboard = () => {
           `${process.env.REACT_APP_API_HOST}/driver/trips/${id}`,
           {
             method: "GET",
-            credentials: "include",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: token,
+            },
           }
         );
         const data = await res.json();
@@ -56,7 +61,7 @@ const Dashboard = () => {
     //     break;
     //   }
     // }
-  }, [id, dataDispatch]);
+  }, [id, token, dataDispatch]);
 
   if (loading) {
     return <Loader loading={loading} description="Please wait" />;
