@@ -51,16 +51,6 @@ const Dashboard = () => {
       }
     };
     fetchTrips();
-    // for (let i = 0; i < trips.length; i++) {
-    //   console.log(trips);
-    //   let trip = trips[i].order;
-    //   if (!trip.isDelivered || !trip.isLoaded) {
-    //     console.log(trip.id);
-    //     let or = trips[i].order;
-    //     console.log(or.id);
-    //     break;
-    //   }
-    // }
   }, [id, token, dataDispatch]);
 
   if (loading) {
