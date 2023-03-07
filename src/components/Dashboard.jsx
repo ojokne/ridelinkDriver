@@ -5,54 +5,63 @@ import Loader from "./Loader";
 import { ACTIONS } from "../context/actions";
 import useId from "../utils/useId";
 import useToken from "../utils/useToken";
+import { onAuthStateChanged } from "firebase/auth";
+import { auth } from "../config/firebase";
+import { useNavigate } from "react-router-dom";
 
 const Dashboard = () => {
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const { dataDispatch } = useData();
   const [delivered, setDelivered] = useState(0);
   const [pending, setPending] = useState(0);
   const [display, setDisplay] = useState(false);
-  let id = useId();
-  const token = useToken();
+  const navigate = useNavigate();
+  // useEffect(() => {
+  //   const fetchTrips = async () => {
+  //     setLoading(true);
+  //     try {
+  //       const res = await fetch(
+  //         `${process.env.REACT_APP_API_HOST}/driver/trips/${id}`,
+  //         {
+  //           method: "GET",
+  //           headers: {
+  //             "Content-Type": "application/json",
+  //             Authorization: token,
+  //           },
+  //         }
+  //       );
+  //       const data = await res.json();
+  //       dataDispatch({ type: ACTIONS.ADD_ORDERS, data: data.data });
+  //       if (data.hasOwnProperty("data")) {
+  //         if (data.data.length) {
+  //           for (let i = 0; i < data.data.length; i++) {
+  //             let trip = data.data[i].trip;
+  //             if (trip.isDelivered) {
+  //               setDelivered((prev) => prev + 1);
+  //             } else {
+  //               setPending((prev) => prev + 1);
+  //             }
+  //           }
+  //           setDisplay(true);
+  //         }
+  //       }
+  //       setLoading(false);
+  //     } catch (e) {
+  //       console.log(e);
+  //       setLoading(false);
+  //     }
+  //   };
+  //   fetchTrips();
+  // }, [id, token, dataDispatch]);
 
   useEffect(() => {
-    const fetchTrips = async () => {
-      setLoading(true);
-      try {
-        const res = await fetch(
-          `${process.env.REACT_APP_API_HOST}/driver/trips/${id}`,
-          {
-            method: "GET",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: token,
-            },
-          }
-        );
-        const data = await res.json();
-        dataDispatch({ type: ACTIONS.ADD_ORDERS, data: data.data });
-        if (data.hasOwnProperty("data")) {
-          if (data.data.length) {
-            for (let i = 0; i < data.data.length; i++) {
-              let trip = data.data[i].trip;
-              if (trip.isDelivered) {
-                setDelivered((prev) => prev + 1);
-              } else {
-                setPending((prev) => prev + 1);
-              }
-            }
-            setDisplay(true);
-          }
-        }
-        setLoading(false);
-      } catch (e) {
-        console.log(e);
-        setLoading(false);
+    onAuthStateChanged(auth, (user) => {
+      setLoading(false);
+      if (!user) {
+        navigate("/login");
       }
-    };
-    fetchTrips();
-  }, [id, token, dataDispatch]);
-
+    });
+  }, [navigate]);
   if (loading) {
     return <Loader loading={loading} description="Please wait" />;
   }
