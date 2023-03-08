@@ -98,7 +98,6 @@ const Signup = () => {
 
     try {
       setLoading(true);
-
       await createUserWithEmailAndPassword(auth, email, password);
       setLoading(false);
       navigate("/");
@@ -138,10 +137,10 @@ const Signup = () => {
 
   useEffect(() => {
     onAuthStateChanged(auth, (user) => {
-      setLoading(false);
       if (user) {
         navigate("/");
       }
+      setLoading(false);
     });
   }, [navigate]);
   if (loading) {
