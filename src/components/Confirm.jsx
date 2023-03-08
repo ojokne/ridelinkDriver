@@ -11,7 +11,7 @@ const Confirm = () => {
   const { data } = useData();
   const [element, setElement] = useState(null);
   const [text, setText] = useState("");
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [display, setDisplay] = useState(false);
 
   const navigate = useNavigate();
