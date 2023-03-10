@@ -1,130 +1,73 @@
-import {
-  createUserWithEmailAndPassword,
-  onAuthStateChanged,
-} from "firebase/auth";
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import Loader from "../components/Loader";
 import Logo from "../components/Logo";
-import { auth } from "../config/firebase";
 
 const Signup = () => {
   const navigate = useNavigate();
-  const [permitNumber, setPermitNumber] = useState("");
-  const [phone, setPhone] = useState("");
-  const [nin, setNin] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-
-  const [permitNumberError, setPermitNumberError] = useState("");
-  const [phoneError, setPhoneError] = useState("");
-  const [ninError, setNinError] = useState("");
-  const [emailError, setEmailError] = useState("");
-  const [passwordError, setPasswordError] = useState("");
-
   const showPasswordRef = useRef();
+  const permitNumberRef = useRef();
+  const ninRef = useRef();
+  const phoneRef = useRef();
+  const emailRef = useRef();
   const passwordRef = useRef();
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [alert, setAlert] = useState({
     alert: false,
     message: "",
   });
 
-  const handleSignup = async (e) => {
+  const handleSignup = async (
+    e,
+    permitNumber,
+    nin,
+    phoneNumber,
+    email,
+    password
+  ) => {
     e.preventDefault();
-
-    // try {
-    //   const res = await fetch(
-    //     `${process.env.REACT_APP_API_HOST}/driver/signup`,
-    //     {
-    //       method: "POST",
-    //       headers: {
-    //         "Content-Type": "application/json",
-    //       },
-    //       body: JSON.stringify({
-    //         permitNumber,
-    //         nin,
-    //         phoneNumber,
-    //         email,
-    //         password,
-    //         role: 1,
-    //       }),
-    //     }
-    //   );
-    //   const data = await res.json();
-    //   setLoading(false);
-
-    //   if (data.isCreated) {
-    //     navigate("/login");
-    //     setAlert((prev) => {
-    //       return { ...prev, alert: false, message: "" };
-    //     });
-    //   } else {
-    //     setAlert((prev) => {
-    //       return { ...prev, alert: true, message: data.msg };
-    //     });
-    //   }
-    // } catch {
-    //   console.log("An error occured");
-    //   setAlert((prev) => {
-    //     return {
-    //       ...prev,
-    //       alert: true,
-    //       message: "An error occurred, Please try again",
-    //     };
-    //   });
-    // }
-    if (!permitNumber.length) {
-      setPermitNumberError("Permit Number cannot be empty");
-      return;
-    }
-    if (!nin.length) {
-      setPermitNumberError("NIN cannot be empty");
-      return;
-    }
-    if (phone.length < 10) {
-      setPhoneError("Should be atleast 10 characters");
-      return;
-    }
-    if (!email.length) {
-      setEmailError("Email cannot be empty");
-      return;
-    }
-
-    if (password.length < 6) {
-      setPasswordError("Password should be atleast 6 characters");
-      return;
-    }
+    setLoading(true);
 
     try {
-      setLoading(true);
-
-      await createUserWithEmailAndPassword(auth, email, password);
-      setLoading(false);
-      navigate("/");
-    } catch (e) {
-      setLoading(false);
-      console.log(e.code);
-      const errorCode = e.code;
-
-      switch (errorCode) {
-        case "auth/email-already-in-use":
-          setAlert((prev) => {
-            return { ...prev, alert: true, message: "Email already in use" };
-          });
-          break;
-
-        case "auth/weak-password":
-          setAlert((prev) => {
-            return { ...prev, alert: true, message: "Weak password" };
-          });
-          break;
-        default: {
-          setAlert((prev) => {
-            return { ...prev, alert: true, message: "An error occured" };
-          });
+      const res = await fetch(
+        `${process.env.REACT_APP_API_HOST}/driver/signup`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            permitNumber,
+            nin,
+            phoneNumber,
+            email,
+            password,
+            role: 1,
+          }),
         }
+      );
+      const data = await res.json();
+      setLoading(false);
+
+      if (data.isCreated) {
+        navigate("/login");
+        setAlert((prev) => {
+          return { ...prev, alert: false, message: "" };
+        });
+      } else {
+        setAlert((prev) => {
+          return { ...prev, alert: true, message: data.msg };
+        });
       }
+    } catch {
+      console.log("An error occured");
+      setAlert((prev) => {
+        return {
+          ...prev,
+          alert: true,
+          message: "An error occurred, Please try again",
+        };
+      });
     }
   };
   const handleShowPassword = () => {
@@ -135,17 +78,13 @@ const Signup = () => {
       passwordField.type = "password";
     }
   };
-
-  useEffect(() => {
-    onAuthStateChanged(auth, (user) => {
-      setLoading(false);
-      if (user) {
-        navigate("/");
-      }
-    });
-  }, [navigate]);
   if (loading) {
-    return <Loader loading={loading} description="Loading" />;
+    return (
+      <Loader
+        loading={loading}
+        description="We are creating your account, please wait"
+      />
+    );
   }
 
   return (
@@ -180,21 +119,9 @@ const Signup = () => {
                 className="form-control"
                 id="permitNumber"
                 placeholder="1234TM"
-                value={permitNumber}
-                onChange={(e) => {
-                  setPermitNumber(e.target.value);
-                  setPermitNumberError("");
-                }}
+                ref={permitNumberRef}
                 required
               />
-              {permitNumberError && (
-                <div
-                  className="text-danger small my-2"
-                  style={{ fontSize: ".6em" }}
-                >
-                  <span>{permitNumberError}</span>
-                </div>
-              )}
             </div>
             <div className="m-3">
               <label htmlFor="nin" className="form-label">
@@ -205,21 +132,9 @@ const Signup = () => {
                 className="form-control"
                 id="nin"
                 placeholder="CM1005969XPHASZ"
-                value={nin}
-                onChange={(e) => {
-                  setNin(e.target.value);
-                  setNinError("");
-                }}
+                ref={ninRef}
                 required
               />
-              {ninError && (
-                <div
-                  className="text-danger small my-2"
-                  style={{ fontSize: ".6em" }}
-                >
-                  <span>{ninError}</span>
-                </div>
-              )}
             </div>
             <div className="m-3">
               <label htmlFor="phone" className="form-label">
@@ -230,21 +145,9 @@ const Signup = () => {
                 className="form-control"
                 id="phone"
                 placeholder="+256 712345678"
-                value={phone}
-                onChange={(e) => {
-                  setPhone(e.target.value);
-                  setPhoneError("");
-                }}
+                ref={phoneRef}
                 required
               />
-              {phoneError && (
-                <div
-                  className="text-danger small my-2"
-                  style={{ fontSize: ".6em" }}
-                >
-                  <span>{phoneError}</span>
-                </div>
-              )}
             </div>
             <div className="m-3">
               <label htmlFor="email" className="form-label">
@@ -254,22 +157,10 @@ const Signup = () => {
                 type="email"
                 className="form-control"
                 id="email"
-                value={email}
-                onChange={(e) => {
-                  setEmail(e.target.value);
-                  setEmailError("");
-                }}
+                ref={emailRef}
                 placeholder="oen@example.com"
                 required
               />
-              {emailError && (
-                <div
-                  className="text-danger small my-2"
-                  style={{ fontSize: ".6em" }}
-                >
-                  <span>{emailError}</span>
-                </div>
-              )}
             </div>
             <div className="m-3">
               <label htmlFor="password" className="form-label">
@@ -279,22 +170,9 @@ const Signup = () => {
                 type="password"
                 className="form-control"
                 id="password"
-                value={password}
-                onChange={(e) => {
-                  setPassword(e.target.value);
-                  setPasswordError("");
-                }}
                 ref={passwordRef}
                 required
               />
-              {passwordError && (
-                <div
-                  className="text-danger small my-2"
-                  style={{ fontSize: ".6em" }}
-                >
-                  <span>{passwordError}</span>
-                </div>
-              )}
             </div>
             <div className="m-3 form-check">
               <input
@@ -311,7 +189,16 @@ const Signup = () => {
             <button
               type="submit"
               className="m-3 btn ridelink-background text-white "
-              onClick={(e) => handleSignup(e)}
+              onClick={(e) =>
+                handleSignup(
+                  e,
+                  permitNumberRef.current.value,
+                  ninRef.current.value,
+                  phoneRef.current.value,
+                  emailRef.current.value,
+                  passwordRef.current.value
+                )
+              }
             >
               Create my account
             </button>

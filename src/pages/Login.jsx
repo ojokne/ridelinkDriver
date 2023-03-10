@@ -1,25 +1,18 @@
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import Logo from "../components/Logo";
 import { useNavigate } from "react-router-dom";
 import Loader from "../components/Loader";
-import { onAuthStateChanged, signInWithEmailAndPassword } from "firebase/auth";
-import { auth } from "../config/firebase";
 
 const Login = () => {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [passwordError, setPasswordError] = useState("");
-  const [emailError, setEmailError] = useState("");
   const showPasswordRef = useRef();
   const passwordRef = useRef();
-
+  const emailRef = useRef();
   const [alert, setAlert] = useState({
     alert: false,
     message: "",
   });
-
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
   const handleShowPassword = () => {
@@ -31,72 +24,47 @@ const Login = () => {
     }
   };
 
-  const handleLogin = async (e) => {
+  const handleLogin = async (e, email, password) => {
     e.preventDefault();
-    setAlert((prev) => {
-      return { ...prev, alert: false, message: "" };
-    });
-    if (!email.length) {
-      setEmailError("Email cannot be empty");
-      return;
-    }
-
-    if (password.length < 6) {
-      setPasswordError("Password should be atleast 6 characters");
-      return;
-    }
-
+    setLoading(true);
     try {
-      setLoading(true);
-      await signInWithEmailAndPassword(auth, email, password);
-      navigate("/");
+      const res = await fetch(`${process.env.REACT_APP_API_HOST}/login`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email,
+          password,
+          role: 1,
+        }),
+      });
+      const data = await res.json();
       setLoading(false);
-    } catch (e) {
-      setLoading(false);
-      console.log(e);
-      let code = e.code;
-      switch (code) {
-        case "auth/invalid-email":
-          setAlert((prev) => {
-            return { ...prev, alert: true, message: "No user with than Email" };
-          });
-          break;
+      if (data.isAuthenticated) {
+        sessionStorage.setItem("driverId", data.id);
+        sessionStorage.setItem("driverToken", data.token);
 
-        case "auth/wrong-password":
-          setAlert((prev) => {
-            return { ...prev, alert: true, message: "Password incorrect" };
-          });
-          break;
-
-        case "auth/user-not-found":
-          setAlert((prev) => {
-            return {
-              ...prev,
-              alert: true,
-              message: "Incorrect email or password",
-            };
-          });
-          break;
-        default:
-          setAlert((prev) => {
-            return {
-              ...prev,
-              alert: true,
-              message: "An error occured",
-            };
-          });
+        navigate("/");
+        setAlert((prev) => {
+          return { ...prev, alert: false, message: "" };
+        });
+      } else {
+        setAlert((prev) => {
+          return { ...prev, alert: true, message: data.msg };
+        });
       }
+    } catch (e) {
+      console.log(e);
+      setAlert((prev) => {
+        return {
+          ...prev,
+          alert: true,
+          message: "An error occurred, Please try again",
+        };
+      });
     }
   };
-  useEffect(() => {
-    onAuthStateChanged(auth, (user) => {
-      setLoading(false);
-      if (user) {
-        navigate("/");
-      }
-    });
-  }, [navigate]);
-
   if (loading) {
     return <Loader loading={loading} description="Please wait" />;
   }
@@ -131,22 +99,10 @@ const Login = () => {
               type="email"
               className="form-control"
               id="email"
+              ref={emailRef}
               required
               placeholder="oen@gmail.com"
-              value={email}
-              onChange={(e) => {
-                setEmail(e.target.value);
-                setEmailError("");
-              }}
             />
-            {emailError && (
-              <div
-                className="text-danger small my-2"
-                style={{ fontSize: ".6em" }}
-              >
-                <span>{emailError}</span>
-              </div>
-            )}
           </div>
           <div className="m-3">
             <label htmlFor="password" className="form-label">
@@ -157,21 +113,8 @@ const Login = () => {
               className="form-control"
               id="password"
               ref={passwordRef}
-              value={password}
-              onChange={(e) => {
-                setPassword(e.target.value);
-                setPasswordError("");
-              }}
               required
             />
-            {passwordError && (
-              <div
-                className="text-danger small my-2 muted"
-                style={{ fontSize: ".6em" }}
-              >
-                <span>{passwordError}</span>
-              </div>
-            )}
           </div>
           <div className="m-3 form-check">
             <input
@@ -188,7 +131,9 @@ const Login = () => {
           <button
             type="submit"
             className="m-3 btn ridelink-background text-white  "
-            onClick={(e) => handleLogin(e)}
+            onClick={(e) =>
+              handleLogin(e, emailRef.current.value, passwordRef.current.value)
+            }
           >
             Login
           </button>

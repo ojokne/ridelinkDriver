@@ -3,9 +3,8 @@ import { useNavigate } from "react-router-dom";
 import { Link } from "react-router-dom";
 import ProductCard from "../components/ProductCard";
 import { useData } from "../context/StateProvider";
-import { onAuthStateChanged } from "firebase/auth";
+import useToken from "../utils/useToken";
 import Loader from "./Loader";
-import { auth } from "../config/firebase";
 
 const Confirm = () => {
   const { data } = useData();
@@ -19,140 +18,132 @@ const Confirm = () => {
     alert: false,
     message: "",
   });
+  const token = useToken();
 
-  // const handleLoading = useCallback(
-  // async (driverId, orderId) => {
-  // setLoading(true);
-  // try {
-  //   const res = await fetch(
-  //     `${process.env.REACT_APP_API_HOST}/driver/load?driverId=${driverId}&orderId=${orderId}`,
-  //     {
-  //       method: "GET",
-  //       headers: {
-  //         "Content-Type": "application/json",
-  //         Authorization: token,
-  //       },
-  //     }
-  //   );
-  //   const data = await res.json();
-  //   setLoading(false);
-  //   if (data.isLoaded) {
-  //     navigate("/");
-  //   } else {
-  //     setAlert((prev) => {
-  //       return {
-  //         ...prev,
-  //         alert: true,
-  //         message: "Could not process request, try again",
-  //       };
-  //     });
-  //   }
-  // } catch (e) {
-  //   console.log(e);
-  // }
-  // },
-  // [navigate]
-  // );
-  // const handleDelivering = useCallback(
-  //   async (driverId, orderId) => {
-  //     setLoading(true);
-  //     try {
-  //       const res = await fetch(
-  //         `${process.env.REACT_APP_API_HOST}/driver/deliver?driverId=${driverId}&orderId=${orderId}`,
-  //         {
-  //           method: "GET",
-  //           headers: {
-  //             "Content-Type": "application/json",
-  //             Authorization: token,
-  //           },
-  //         }
-  //       );
-  //       const data = await res.json();
-  //       setLoading(false);
-  //       if (data.isDelivered) {
-  //         navigate("/");
-  //       } else {
-  //         setAlert((prev) => {
-  //           return {
-  //             ...prev,
-  //             alert: true,
-  //             message: "Could not process request, try again",
-  //           };
-  //         });
-  //       }
-  //     } catch (e) {
-  //       console.log(e);
-  //     }
-  //   },
-  //   [navigate]
-  // );
-  // useEffect(() => {
-  //   if (data.hasOwnProperty("data")) {
-  //     if (data.data.length) {
-  //       for (let i = 0; i < data.data.length; i++) {
-  //         let trip = data.data[i].trip;
-  //         if (!trip.isDelivered || !trip.isLoaded) {
-  //           let order = data.data[i].order;
-  //           setElement(() => {
-  //             return trip.isLoaded ? (
-  //               <ProductCard
-  //                 order={order}
-  //                 trip={trip}
-  //                 action={handleDelivering}
-  //               />
-  //             ) : (
-  //               <ProductCard order={order} trip={trip} action={handleLoading} />
-  //             );
-  //           });
-  //           setText(() => {
-  //             return trip.isLoaded
-  //               ? "Please confirm if Product has been Delivered"
-  //               : "Please confirm if product has been Loaded onto the truck";
-  //           });
-  //           setDisplay(true);
-  //           break;
-  //         }
-  //       }
-  //     }
-  //   } else {
-  //     console.log("No data");
-  //   }
-  //   // let displayOrder = {};
-  //   // let displayTrip = {};
-  //   // for (let i = 0; i < data.data.length; i++) {
-  //   //   let trip = data.data[i].trip;
-  //   //   if (!trip.isDelivered || !trip.isLoaded) {
-  //   //     let item = data.data[i].order;
-  //   //     displayOrder = item;
-  //   //     displayTrip = trip;
-  //   //     break;
-  //   //   }
-  //   // }
-  //   // setOrder(displayOrder);
-  //   // setTrip(displayTrip);
-  //   // setElement(() => {
-  //   //   return trip.isLoaded ? (
-  //   //     <ProductCard order={order} trip={trip} action={handleDelivering} />
-  //   //   ) : (
-  //   //     <ProductCard order={order} trip={trip} action={handleLoading} />
-  //   //   );
-  //   // });
-  //   // setText(() => {
-  //   //   return trip.isLoaded
-  //   //     ? "Please confirm if Product is Delivered"
-  //   //     : "Please confirm if product is Loaded onto the truck";
-  //   // });
-  //   // eslint-disable-next-line
-  // }, [handleDelivering, handleLoading]);
-
-  useEffect(() => {
-    onAuthStateChanged(auth, (user) => {
-      setLoading(false);
-      if (!user) {
-        navigate("/login");
+  const handleLoading = useCallback(
+    async (driverId, orderId) => {
+      setLoading(true);
+      try {
+        const res = await fetch(
+          `${process.env.REACT_APP_API_HOST}/driver/load?driverId=${driverId}&orderId=${orderId}`,
+          {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: token,
+            },
+          }
+        );
+        const data = await res.json();
+        setLoading(false);
+        if (data.isLoaded) {
+          navigate("/");
+        } else {
+          setAlert((prev) => {
+            return {
+              ...prev,
+              alert: true,
+              message: "Could not process request, try again",
+            };
+          });
+        }
+      } catch (e) {
+        console.log(e);
       }
-    });
-  }, [navigate]);
+    },
+    [navigate]
+  );
+  const handleDelivering = useCallback(
+    async (driverId, orderId) => {
+      setLoading(true);
+      try {
+        const res = await fetch(
+          `${process.env.REACT_APP_API_HOST}/driver/deliver?driverId=${driverId}&orderId=${orderId}`,
+          {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: token,
+            },
+          }
+        );
+        const data = await res.json();
+        setLoading(false);
+        if (data.isDelivered) {
+          navigate("/");
+        } else {
+          setAlert((prev) => {
+            return {
+              ...prev,
+              alert: true,
+              message: "Could not process request, try again",
+            };
+          });
+        }
+      } catch (e) {
+        console.log(e);
+      }
+    },
+    [navigate]
+  );
+  useEffect(() => {
+    if (data.hasOwnProperty("data")) {
+      if (data.data.length) {
+        for (let i = 0; i < data.data.length; i++) {
+          let trip = data.data[i].trip;
+          if (!trip.isDelivered || !trip.isLoaded) {
+            let order = data.data[i].order;
+            setElement(() => {
+              return trip.isLoaded ? (
+                <ProductCard
+                  order={order}
+                  trip={trip}
+                  action={handleDelivering}
+                />
+              ) : (
+                <ProductCard order={order} trip={trip} action={handleLoading} />
+              );
+            });
+            setText(() => {
+              return trip.isLoaded
+                ? "Please confirm if Product has been Delivered"
+                : "Please confirm if product has been Loaded onto the truck";
+            });
+            setDisplay(true);
+            break;
+          }
+        }
+      }
+    } else {
+      console.log("No data");
+    }
+    // let displayOrder = {};
+    // let displayTrip = {};
+    // for (let i = 0; i < data.data.length; i++) {
+    //   let trip = data.data[i].trip;
+    //   if (!trip.isDelivered || !trip.isLoaded) {
+    //     let item = data.data[i].order;
+    //     displayOrder = item;
+    //     displayTrip = trip;
+    //     break;
+    //   }
+    // }
+    // setOrder(displayOrder);
+    // setTrip(displayTrip);
+    // setElement(() => {
+    //   return trip.isLoaded ? (
+    //     <ProductCard order={order} trip={trip} action={handleDelivering} />
+    //   ) : (
+    //     <ProductCard order={order} trip={trip} action={handleLoading} />
+    //   );
+    // });
+    // setText(() => {
+    //   return trip.isLoaded
+    //     ? "Please confirm if Product is Delivered"
+    //     : "Please confirm if product is Loaded onto the truck";
+    // });
+    // eslint-disable-next-line
+  }, [handleDelivering, handleLoading]);
 
   if (loading) {
     return <Loader loading={loading} description="Please wait" />;
