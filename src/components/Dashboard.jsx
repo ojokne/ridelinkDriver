@@ -1,67 +1,75 @@
 import { useEffect, useState } from "react";
-import { useData } from "../context/StateProvider";
+import { useOrders } from "../context/StateProvider";
 import { FaClock, FaCheck } from "react-icons/fa";
 import Loader from "./Loader";
 import { ACTIONS } from "../context/actions";
-import useId from "../utils/useId";
-import useToken from "../utils/useToken";
 import { onAuthStateChanged } from "firebase/auth";
-import { auth } from "../config/firebase";
-import { useNavigate } from "react-router-dom";
+import { auth, db } from "../config/firebase";
+import { Link, Outlet, useNavigate } from "react-router-dom";
+import { collection, onSnapshot, query, where } from "firebase/firestore";
 
 const Dashboard = () => {
   const [loading, setLoading] = useState(true);
-  const { dataDispatch } = useData();
+  const { ordersDispatch } = useOrders();
   const [delivered, setDelivered] = useState(0);
   const [pending, setPending] = useState(0);
   const [display, setDisplay] = useState(false);
   const navigate = useNavigate();
-  // useEffect(() => {
-  //   const fetchTrips = async () => {
-  //     setLoading(true);
-  //     try {
-  //       const res = await fetch(
-  //         `${process.env.REACT_APP_API_HOST}/driver/trips/${id}`,
-  //         {
-  //           method: "GET",
-  //           headers: {
-  //             "Content-Type": "application/json",
-  //             Authorization: token,
-  //           },
-  //         }
-  //       );
-  //       const data = await res.json();
-  //       dataDispatch({ type: ACTIONS.ADD_ORDERS, data: data.data });
-  //       if (data.hasOwnProperty("data")) {
-  //         if (data.data.length) {
-  //           for (let i = 0; i < data.data.length; i++) {
-  //             let trip = data.data[i].trip;
-  //             if (trip.isDelivered) {
-  //               setDelivered((prev) => prev + 1);
-  //             } else {
-  //               setPending((prev) => prev + 1);
-  //             }
-  //           }
-  //           setDisplay(true);
-  //         }
-  //       }
-  //       setLoading(false);
-  //     } catch (e) {
-  //       console.log(e);
-  //       setLoading(false);
-  //     }
-  //   };
-  //   fetchTrips();
-  // }, [id, token, dataDispatch]);
 
   useEffect(() => {
-    onAuthStateChanged(auth, (user) => {
-      setLoading(false);
-      if (!user) {
+    let unsubcribeFromFirestore;
+    const unsubcribeFromAuth = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        const querySnapShot = query(
+          collection(db, "eOrders"),
+          "eOrders",
+          where("driverId", "==", auth.currentUser.uid)
+        );
+        unsubcribeFromFirestore = onSnapshot(querySnapShot, (snapshot) => {
+          if (snapshot.empty) {
+            setDisplay(false);
+            setLoading(false);
+          } else {
+            for (let i = 0; i < snapshot.docs.length; i++) {
+              let order = snapshot.docs[i].data();
+              if (order.isConfirmed) {
+                if (order.isDelivered) {
+                  setDelivered((prev) => prev + 1);
+                } else {
+                  setPending((prev) => prev + 1);
+                }
+              }
+            }
+
+            let ordersArray = [];
+            for (let i = 0; i < snapshot.docs.length; i++) {
+              const order = {
+                ...snapshot.docs[i].data(),
+                id: snapshot.docs[i].id,
+              };
+              ordersArray.push(order);
+            }
+            ordersDispatch({ type: ACTIONS.ADD_ORDERS, orders: ordersArray });
+            setLoading(false);
+            setDisplay(true);
+          }
+        });
+      } else {
         navigate("/login");
+        if (unsubcribeFromFirestore) {
+          unsubcribeFromFirestore();
+        }
       }
     });
-  }, [navigate]);
+    return () => {
+      unsubcribeFromAuth();
+      setDelivered(0);
+      setPending(0);
+      if (unsubcribeFromFirestore) {
+        unsubcribeFromFirestore();
+      }
+    };
+  }, [navigate, ordersDispatch]);
   if (loading) {
     return <Loader loading={loading} description="Please wait" />;
   }
@@ -71,42 +79,71 @@ const Dashboard = () => {
         <span>Dashboard</span>
       </div>
       {display && (
-        <div className="d-flex justify-content-center align-items-center flex-wrap">
-          <div
-            style={{ width: "367px" }}
-            className="m-3 p-4 bg-white shadow-sm rounded"
-          >
-            <span className="text-muted" style={{ fontSize: "20px" }}>
-              Pending
-            </span>
-            <div className="d-flex align-items-center">
-              <span>
-                <FaClock
-                  className="icon iconMenu me-3"
-                  style={{ backgroundColor: "#ffc107" }}
-                />
+        <div>
+          <div className="d-flex justify-content-center align-items-center flex-wrap">
+            <div
+              style={{ width: "367px" }}
+              className="m-3 p-4 bg-white shadow-sm rounded"
+            >
+              <span className="text-muted" style={{ fontSize: "20px" }}>
+                Pending
               </span>
-              <span className="me-3" style={{ fontSize: "30px" }}>
-                {pending}
+              <div className="d-flex align-items-center">
+                <span>
+                  <FaClock
+                    className="icon iconMenu me-3"
+                    style={{ backgroundColor: "#ffc107" }}
+                  />
+                </span>
+                <span className="me-3" style={{ fontSize: "30px" }}>
+                  {pending}
+                </span>
+              </div>
+              <div className="mt-3">
+                {pending > 0 ? (
+                  <Link
+                    to="pending"
+                    className="text-decoration-none ridelink-color"
+                  >
+                    View pending orders
+                  </Link>
+                ) : (
+                  <span className="text-muted">No orders on trip</span>
+                )}
+              </div>
+            </div>
+            <div
+              style={{ width: "367px" }}
+              className="m-3 p-4 bg-white shadow-sm rounded"
+            >
+              <span className="text-muted" style={{ fontSize: "20px" }}>
+                Delivered
               </span>
+              <div className="d-flex align-items-center">
+                <span>
+                  <FaCheck className="icon iconMenu me-3" />
+                </span>
+                <span className="me-3" style={{ fontSize: "30px" }}>
+                  {delivered}
+                </span>
+              </div>
+              <div className="mt-3">
+                {delivered > 0 ? (
+                  <Link
+                    to="delivered"
+                    className="text-decoration-none ridelink-color"
+                  >
+                    View orders delivered
+                  </Link>
+                ) : (
+                  <span className="text-muted">
+                    No orders have been delivered
+                  </span>
+                )}
+              </div>
             </div>
           </div>
-          <div
-            style={{ width: "367px" }}
-            className="m-3 p-4 bg-white shadow-sm rounded"
-          >
-            <span className="text-muted" style={{ fontSize: "20px" }}>
-              Delivered
-            </span>
-            <div className="d-flex align-items-center">
-              <span>
-                <FaCheck className="icon iconMenu me-3" />
-              </span>
-              <span className="me-3" style={{ fontSize: "30px" }}>
-                {delivered}
-              </span>
-            </div>
-          </div>
+          <Outlet />
         </div>
       )}
       {!display && (

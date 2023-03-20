@@ -1,5 +1,4 @@
 import { FaTruckMoving } from "react-icons/fa";
-import useId from "../utils/useId";
 
 const styles = {
   iconLarge: {
@@ -13,10 +12,9 @@ const styles = {
   },
 };
 
-const ProductCard = ({ order, action, trip }) => {
-  const id = useId();
-  const date = new Date(order.proposedScheduleDate).toDateString();
-  const text = trip.isLoaded
+const ProductCard = ({ order, action }) => {
+  const date = new Date(order.scheduleDate).toDateString();
+  const text = order.isLoaded
     ? "Product has been Delivered"
     : "Product has been Loaded";
   return (
@@ -81,7 +79,7 @@ const ProductCard = ({ order, action, trip }) => {
           <div className="px-1 my-2">
             <button
               className="btn ridelink-background text-white "
-              onClick={() => action(id, order.id)}
+              onClick={() => action(order.id)}
             >
               {text}
             </button>

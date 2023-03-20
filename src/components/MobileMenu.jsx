@@ -34,7 +34,7 @@ const MobileMenu = ({ handleShowMenu }) => {
           </li>
         </Link>
 
-        <Link
+        {/* <Link
           className="text-decoration-none"
           to="confirm"
           onClick={() => handleShowMenu()}
@@ -48,7 +48,7 @@ const MobileMenu = ({ handleShowMenu }) => {
               />
             </span>
           </li>
-        </Link>
+        </Link> */}
         <li
           className="py-2 d-flex align-items-center liMenu d-flex justify-content-between align-items-center"
           onClick={(e) => handleLogout(e)}

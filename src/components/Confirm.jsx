@@ -2,13 +2,13 @@ import { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Link } from "react-router-dom";
 import ProductCard from "../components/ProductCard";
-import { useData } from "../context/StateProvider";
+import { useOrders } from "../context/StateProvider";
 import { onAuthStateChanged } from "firebase/auth";
 import Loader from "./Loader";
 import { auth } from "../config/firebase";
 
 const Confirm = () => {
-  const { data } = useData();
+  const { orders } = useOrders();
   const [element, setElement] = useState(null);
   const [text, setText] = useState("");
   const [loading, setLoading] = useState(true);
@@ -93,17 +93,17 @@ const Confirm = () => {
   //         let trip = data.data[i].trip;
   //         if (!trip.isDelivered || !trip.isLoaded) {
   //           let order = data.data[i].order;
-  //           setElement(() => {
-  //             return trip.isLoaded ? (
-  //               <ProductCard
-  //                 order={order}
-  //                 trip={trip}
-  //                 action={handleDelivering}
-  //               />
-  //             ) : (
-  //               <ProductCard order={order} trip={trip} action={handleLoading} />
-  //             );
-  //           });
+  // setElement(() => {
+  //   return trip.isLoaded ? (
+  //     <ProductCard
+  //       order={order}
+  //       trip={trip}
+  //       action={handleDelivering}
+  //     />
+  //   ) : (
+  //     <ProductCard order={order} trip={trip} action={handleLoading} />
+  //   );
+  // });
   //           setText(() => {
   //             return trip.isLoaded
   //               ? "Please confirm if Product has been Delivered"

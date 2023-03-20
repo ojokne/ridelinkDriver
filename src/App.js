@@ -6,6 +6,8 @@ import Signup from "./pages/Signup";
 import Home from "./pages/Home";
 import Dashboard from "./components/Dashboard";
 import Confirm from "./components/Confirm";
+import Pending from "./components/Pending";
+import Delivered from "./components/Delivered";
 
 function App() {
   return (
@@ -15,7 +17,10 @@ function App() {
         <Route path="/signup" element={<Signup />} />
         <Route element={<ProtectedRoutes />}></Route>
         <Route path="/" element={<Home />}>
-          <Route path="/" element={<Dashboard />} />
+          <Route path="/" element={<Dashboard />}>
+            <Route path="pending" element={<Pending />} />
+            <Route path="delivered" element={<Delivered />} />
+          </Route>
           <Route path="/confirm" element={<Confirm />} />
         </Route>
         <Route path="*" element={<p>Error page</p>} />

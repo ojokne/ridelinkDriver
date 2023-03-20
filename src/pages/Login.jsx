@@ -19,7 +19,7 @@ const Login = () => {
     message: "",
   });
 
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
   const handleShowPassword = () => {
@@ -37,7 +37,7 @@ const Login = () => {
       return { ...prev, alert: false, message: "" };
     });
     if (!email.length) {
-      setEmailError("Email cannot be empty");
+      setEmailError("Email is required");
       return;
     }
 
@@ -88,14 +88,14 @@ const Login = () => {
       }
     }
   };
-  useEffect(() => {
-    onAuthStateChanged(auth, (user) => {
-      if (user) {
-        navigate("/");
-      }
-      setLoading(false);
-    });
-  }, [navigate]);
+  // useEffect(() => {
+  //   onAuthStateChanged(auth, (user) => {
+  //     if (user) {
+  //       navigate("/");
+  //     }
+  //     setLoading(false);
+  //   });
+  // }, [navigate]);
 
   if (loading) {
     return <Loader loading={loading} description="Please wait" />;

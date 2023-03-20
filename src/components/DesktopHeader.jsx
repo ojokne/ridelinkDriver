@@ -26,14 +26,14 @@ const DesktopHeader = () => {
         </div>
         <div className="d-flex flex-row ">
           <div className="px-2 d-flex justify-content-between align-items-center">
-            <span className="px-1 lead">Driver</span>
+            <span className="px-1 text-muted">Driver</span>
             <span>
               <FaUser className="icon iconMenu" />
             </span>
           </div>
           <div className="px-2 d-flex justify-content-between align-items-center logoutBtn">
             <button className="btn p-0" onClick={(e) => handleLogout(e)}>
-              <span className="ps-3">Logout</span>
+              <span className="ps-3 text-muted">Logout</span>
               <span>
                 <FaSignOutAlt className="icon iconMenu" />
               </span>

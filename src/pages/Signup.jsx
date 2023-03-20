@@ -6,7 +6,8 @@ import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import Loader from "../components/Loader";
 import Logo from "../components/Logo";
-import { auth } from "../config/firebase";
+import { auth, db } from "../config/firebase";
+import { doc, setDoc } from "firebase/firestore";
 
 const Signup = () => {
   const navigate = useNavigate();
@@ -24,7 +25,7 @@ const Signup = () => {
 
   const showPasswordRef = useRef();
   const passwordRef = useRef();
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [alert, setAlert] = useState({
     alert: false,
     message: "",
@@ -33,53 +34,12 @@ const Signup = () => {
   const handleSignup = async (e) => {
     e.preventDefault();
 
-    // try {
-    //   const res = await fetch(
-    //     `${process.env.REACT_APP_API_HOST}/driver/signup`,
-    //     {
-    //       method: "POST",
-    //       headers: {
-    //         "Content-Type": "application/json",
-    //       },
-    //       body: JSON.stringify({
-    //         permitNumber,
-    //         nin,
-    //         phoneNumber,
-    //         email,
-    //         password,
-    //         role: 1,
-    //       }),
-    //     }
-    //   );
-    //   const data = await res.json();
-    //   setLoading(false);
-
-    //   if (data.isCreated) {
-    //     navigate("/login");
-    //     setAlert((prev) => {
-    //       return { ...prev, alert: false, message: "" };
-    //     });
-    //   } else {
-    //     setAlert((prev) => {
-    //       return { ...prev, alert: true, message: data.msg };
-    //     });
-    //   }
-    // } catch {
-    //   console.log("An error occured");
-    //   setAlert((prev) => {
-    //     return {
-    //       ...prev,
-    //       alert: true,
-    //       message: "An error occurred, Please try again",
-    //     };
-    //   });
-    // }
     if (!permitNumber.length) {
-      setPermitNumberError("Permit Number cannot be empty");
+      setPermitNumberError("Permit Number is required");
       return;
     }
     if (!nin.length) {
-      setPermitNumberError("NIN cannot be empty");
+      setPermitNumberError("NIN is required");
       return;
     }
     if (phone.length < 10) {
@@ -87,7 +47,7 @@ const Signup = () => {
       return;
     }
     if (!email.length) {
-      setEmailError("Email cannot be empty");
+      setEmailError("Email is required");
       return;
     }
 
@@ -98,7 +58,14 @@ const Signup = () => {
 
     try {
       setLoading(true);
-      await createUserWithEmailAndPassword(auth, email, password);
+      let user = await createUserWithEmailAndPassword(auth, email, password);
+      await setDoc(doc(db, "eDrivers", user.user.uid), {
+        permitNumber,
+        nin,
+        phone,
+        email,
+        isAvailable: true,
+      });
       setLoading(false);
       navigate("/");
     } catch (e) {
@@ -135,14 +102,14 @@ const Signup = () => {
     }
   };
 
-  useEffect(() => {
-    onAuthStateChanged(auth, (user) => {
-      if (user) {
-        navigate("/");
-      }
-      setLoading(false);
-    });
-  }, [navigate]);
+  // useEffect(() => {
+  //   onAuthStateChanged(auth, (user) => {
+  //     if (user) {
+  //       navigate("/");
+  //     }
+  //     setLoading(false);
+  //   });
+  // }, [navigate]);
   if (loading) {
     return <Loader loading={loading} description="Loading" />;
   }

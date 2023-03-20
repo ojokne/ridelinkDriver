@@ -1,18 +1,18 @@
 import { createContext, useContext, useReducer } from "react";
-import { dataReducer } from "./dataReducer";
+import { orderReducer } from "./orderReducer";
 
-const DataContext = createContext();
+const OrdersContext = createContext();
 
 export const StateProvider = ({ children }) => {
-  const [data, dataDispatch] = useReducer(dataReducer, {});
+  const [orders, ordersDispatch] = useReducer(orderReducer, {});
 
   return (
-    <DataContext.Provider value={{ data, dataDispatch }}>
+    <OrdersContext.Provider value={{ orders, ordersDispatch }}>
       {children}
-    </DataContext.Provider>
+    </OrdersContext.Provider>
   );
 };
 
-export const useData = () => {
-  return useContext(DataContext);
+export const useOrders = () => {
+  return useContext(OrdersContext);
 };

@@ -14,7 +14,7 @@ const DesktopMenu = () => {
           </li>
         </Link>
 
-        <Link className="text-decoration-none" to="confirm">
+        {/* <Link className="text-decoration-none" to="confirm">
           <li className="py-2 border-bottom liMenu">
             <span>
               <FaClock
@@ -24,7 +24,7 @@ const DesktopMenu = () => {
             </span>
             <span className="text-muted">Pending</span>
           </li>
-        </Link>
+        </Link> */}
       </ul>
     </div>
   );
